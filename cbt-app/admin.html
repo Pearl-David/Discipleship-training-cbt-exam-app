@@ -1,21 +1,60 @@
 <!DOCTYPE html>
-<html>
-<head><title>Admin - Results</title></head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            background-color: #f9f9f9;
+        }
+        h2 {
+            color: #333;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #eeeeee;
+        }
+        tr:nth-child(even) {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
 <body>
-    <h2>Exam Results</h2>
-    <table border="1">
-        <tr>
-            <th>Full Name</th>
-            <th>Score</th>
-            <th>Attempted</th>
-        </tr>
-        {% for user in users %}
-        <tr>
-            <td>{{ user.username }}</td>
-            <td>{{ user.score }}</td>
-            <td>{{ 'Yes' if user.attempted else 'No' }}</td>
-        </tr>
-        {% endfor %}
+    <h2>📊 Admin Dashboard</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Score</th>
+                <th>Attempted</th>
+                <th>Tab Switches</th>
+                <th>Last Tab Switch</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.score if user.attempted else 'N/A' }}</td>
+                    <td>{{ 'Yes' if user.attempted else 'No' }}</td>
+                    <td>{{ user.tab_switches }}</td>
+                    <td>{{ user.last_tab_switch or 'N/A' }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </body>
 </html>
