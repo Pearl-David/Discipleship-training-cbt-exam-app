@@ -1,68 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>CBT Exam</title>
-    <script>
-        let tabSwitchCount = 0;
-        let warned = false;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Fullscreen
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            }
-        });
-
-        // Disable right-click and copy/paste
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('copy', e => e.preventDefault());
-        document.addEventListener('paste', e => e.preventDefault());
-
-        // Prevent back button
-        history.pushState(null, null, location.href);
-        window.onpopstate = function () {
-            history.go(1);
-        };
-
-        // Handle tab switching
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                tabSwitchCount++;
-
-                if (tabSwitchCount === 1) {
-                    alert("⚠️ You left the exam tab! One more time and your exam will be auto-submitted.");
-                }
-
-                if (tabSwitchCount >= 2 && !warned) {
-                    warned = true;
-
-                    let seconds = 5;
-                    const countdown = setInterval(() => {
-                        if (seconds === 0) {
-                            clearInterval(countdown);
-                            document.getElementById('examForm').submit();
-                        } else {
-                            alert(`Auto-submitting in ${seconds} seconds due to malpractice...`);
-                            seconds--;
-                        }
-                    }, 1000);
-                }
-            }
-        });
-    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .question-box {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        button {
+            padding: 10px 20px;
+            font-weight: bold;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <h2>CBT Exam</h2>
+    <h2>Online CBT Examination</h2>
     <form id="examForm" method="post" action="/submit">
         {% for q in questions %}
-        <div>
-            <p><b>{{ loop.index }}. {{ q.text }}</b></p>
-            <input type="radio" name="q{{ q.id }}" value="A" required> A. {{ q.option_a }}<br>
-            <input type="radio" name="q{{ q.id }}" value="B"> B. {{ q.option_b }}<br>
-            <input type="radio" name="q{{ q.id }}" value="C"> C. {{ q.option_c }}<br><br>
-        </div>
+            <div class="question-box">
+                <p><strong>Q{{ loop.index }}:</strong> {{ q.text }}</p>
+                <input type="radio" name="q{{ q.id }}" value="A" required> A. {{ q.option_a }}<br>
+                <input type="radio" name="q{{ q.id }}" value="B"> B. {{ q.option_b }}<br>
+                <input type="radio" name="q{{ q.id }}" value="C"> C. {{ q.option_c }}<br>
+            </div>
         {% endfor %}
-        <input type="submit" value="Submit Answers">
+        <button type="submit">Submit Exam</button>
     </form>
+
+    <script>
+        let switchCount = 0;
+        let warningIssued = false;
+
+        function logTabSwitch() {
+            fetch('/log_tab_switch', { method: 'POST' });
+        }
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                switchCount++;
+                logTabSwitch();
+                if (!warningIssued) {
+                    alert("Tab switch detected! Please return. Exam will auto-submit on second switch.");
+                    warningIssued = true;
+                } else {
+                    alert("Second switch detected! Exam auto-submitting.");
+                    document.getElementById("examForm").submit();
+                }
+            }
+        });
+
+        document.addEventListener("contextmenu", event => event.preventDefault());
+        document.onkeydown = function(e) {
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u')) return false;
+        };
+    </script>
 </body>
 </html>
