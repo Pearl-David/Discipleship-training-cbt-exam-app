@@ -55,7 +55,7 @@ with app.app_context():
             Question(text="What is the devil not afraid of?", option_a="Programs", option_b="Holy men", option_c="Fasting", correct_answer="A"),
             Question(text="Where did Ravenhill say true revival starts?", option_a="In churches", option_b="In seminars", option_c="In hearts", correct_answer="C"),
             Question(text="What makes a sermon powerful, according to Ravenhill?", option_a="Length", option_b="Delivery", option_c="Burden", correct_answer="C"),
-            Question(text="Ravenhill said, 'The church used to be a lifeboat, now it’s a..."", option_a="Cruise ship", option_b="Battleship", option_c="Fishing boat", correct_answer="A")
+            Question(text="Ravenhill said, 'The church used to be a lifeboat, now it\'s a cruise ship'", option_a="Cruise ship", option_b="Battleship", option_c="Fishing boat", correct_answer="A")
         ]
         db.session.add_all(questions)
         db.session.commit()
