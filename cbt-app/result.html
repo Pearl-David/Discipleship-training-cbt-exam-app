@@ -1,8 +1,32 @@
 <!DOCTYPE html>
-<html>
-<head><title>Result</title></head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Exam Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa;
+            text-align: center;
+            padding: 50px;
+        }
+        .result-box {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #00796b;
+        }
+    </style>
+</head>
 <body>
-    <h2>Exam Completed!</h2>
-    <p>You scored {{ score }} out of {{ total }}.</p>
+    <div class="result-box">
+        <h2>✅ Exam Completed</h2>
+        <p><strong>Your Score:</strong> {{ score }} out of {{ total }}</p>
+        <p>Thank you for participating!</p>
+    </div>
 </body>
 </html>
