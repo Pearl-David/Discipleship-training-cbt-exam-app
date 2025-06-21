@@ -1,19 +1,27 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import datetime
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'
+app.secret_key = os.urandom(24)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_PERMANENT'] = False
+
 db = SQLAlchemy(app)
 
 # Database models
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(50), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
     attempted = db.Column(db.Boolean, default=False)
     score = db.Column(db.Integer)
+    tab_switches = db.Column(db.Integer, default=0)
+    last_tab_switch = db.Column(db.DateTime)
 
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -28,63 +36,59 @@ with app.app_context():
     db.create_all()
     if not Question.query.first():
         questions = [
-    # Book of Acts
-    Question(text="Who replaced Judas Iscariot as the twelfth apostle?", option_a="Barnabas", option_b="Matthias", option_c="Stephen", correct_answer="B"),
-    Question(text="What miraculous event occurred on the day of Pentecost?", option_a="Jesus ascended to heaven", option_b="The disciples spoke in tongues", option_c="The temple veil was torn", correct_answer="B"),
-    Question(text="What was the name of the man healed at the Beautiful Gate?", option_a="Simon", option_b="Bartimaeus", option_c="Not named", correct_answer="C"),
-    Question(text="Who held the clothes of those who stoned Stephen?", option_a="Paul", option_b="Saul", option_c="Peter", correct_answer="B"),
-    Question(text="Which apostle baptized the Ethiopian eunuch?", option_a="Philip", option_b="Peter", option_c="Paul", correct_answer="A"),
-    Question(text="What was Paul's name before conversion?", option_a="Simon", option_b="Saul", option_c="Stephen", correct_answer="B"),
-    Question(text="Where was Saul going when he encountered Jesus?", option_a="Antioch", option_b="Damascus", option_c="Jerusalem", correct_answer="B"),
-    Question(text="What happened to Ananias and Sapphira?", option_a="They were exiled", option_b="They repented", option_c="They died", correct_answer="C"),
-    Question(text="Who was the first Gentile to receive the Holy Spirit?", option_a="Cornelius", option_b="Timothy", option_c="Lydia", correct_answer="A"),
-    Question(text="Where were believers first called Christians?", option_a="Jerusalem", option_b="Antioch", option_c="Rome", correct_answer="B"),
-
-    # Why Revival Tarries
-    Question(text="According to Ravenhill, what is the missing element in many churches?", option_a="Music", option_b="Prayer", option_c="Preaching", correct_answer="B"),
-    Question(text="What does Ravenhill say revival tarries because of?", option_a="Lack of evangelism", option_b="Lack of Bibles", option_c="Lack of brokenness", correct_answer="C"),
-    Question(text="What did Ravenhill refer to as the ‘secret’ of power?", option_a="Fasting", option_b="Prayer", option_c="Preaching", correct_answer="B"),
-    Question(text="According to Ravenhill, where does revival begin?", option_a="In the church building", option_b="With leadership", option_c="In the heart of man", correct_answer="C"),
-    Question(text="What kind of preaching does Ravenhill emphasize?", option_a="Prosperity", option_b="Repentance", option_c="Motivational", correct_answer="B"),
-    Question(text="Ravenhill said, 'The church used to be a lifeboat, now it’s a...'", option_a="Cruise ship", option_b="Battleship", option_c="Fishing boat", correct_answer="A"),
-    Question(text="What is essential for spiritual awakening, as per Ravenhill?", option_a="Planning", option_b="Praying men", option_c="Publicity", correct_answer="B"),
-    Question(text="What does Ravenhill say is the greatest tragedy?", option_a="Sin in the world", option_b="Unrepentant believers", option_c="A sick church in a dying world", correct_answer="C"),
-    Question(text="Which biblical character does Ravenhill say we need more of?", option_a="Elijah", option_b="David", option_c="John", correct_answer="A"),
-    Question(text="Why does revival tarry, according to the book?", option_a="We are too lazy", option_b="The altar is too clean", option_c="We are content without it", correct_answer="C")
-]
+            Question(text="Who replaced Judas Iscariot as a disciple?", option_a="Matthias", option_b="Barnabas", option_c="Stephen", correct_answer="A"),
+            Question(text="Where did the Holy Spirit descend on the apostles?", option_a="Upper Room", option_b="Synagogue", option_c="Temple", correct_answer="A"),
+            Question(text="What appeared over the apostles' heads on Pentecost?", option_a="Smoke", option_b="Flames", option_c="Water", correct_answer="B"),
+            Question(text="What was Paul's original name?", option_a="Simon", option_b="Saul", option_c="Silas", correct_answer="B"),
+            Question(text="Who was stoned while Paul watched?", option_a="Stephen", option_b="Barnabas", option_c="Peter", correct_answer="A"),
+            Question(text="Where was Paul when he encountered Jesus?", option_a="Damascus", option_b="Jerusalem", option_c="Rome", correct_answer="A"),
+            Question(text="Who healed the lame man at the temple gate?", option_a="Peter & John", option_b="Paul", option_c="Stephen", correct_answer="A"),
+            Question(text="How many people were added to the church on Pentecost?", option_a="3000", option_b="120", option_c="5000", correct_answer="A"),
+            Question(text="What was the name of the sorcerer in Acts 8?", option_a="Simon", option_b="Elymas", option_c="Bar-Jesus", correct_answer="A"),
+            Question(text="What was Paul's profession?", option_a="Fisherman", option_b="Tentmaker", option_c="Carpenter", correct_answer="B"),
+            Question(text="Why does Ravenhill say revival tarries?", option_a="Because people don't pray", option_b="Because God delays", option_c="Because of politics", correct_answer="A"),
+            Question(text="What does Ravenhill call the missing element in modern preaching?", option_a="Humor", option_b="Anointing", option_c="Fire", correct_answer="C"),
+            Question(text="What must a man do before God will use him mightily?", option_a="Be educated", option_b="Be broken", option_c="Be famous", correct_answer="B"),
+            Question(text="What did Ravenhill say the church lacks today?", option_a="Strategy", option_b="Power", option_c="Money", correct_answer="B"),
+            Question(text="What kind of men does God use?", option_a="Gifted men", option_b="Smart men", option_c="Broken men", correct_answer="C"),
+            Question(text="What did Ravenhill say we need more than revival meetings?", option_a="Prayer meetings", option_b="Miracles", option_c="Money", correct_answer="A"),
+            Question(text="What is the devil not afraid of?", option_a="Programs", option_b="Holy men", option_c="Fasting", correct_answer="A"),
+            Question(text="Where did Ravenhill say true revival starts?", option_a="In churches", option_b="In seminars", option_c="In hearts", correct_answer="C"),
+            Question(text="What makes a sermon powerful, according to Ravenhill?", option_a="Length", option_b="Delivery", option_c="Burden", correct_answer="C"),
+            Question(text="Ravenhill said, 'The church used to be a lifeboat, now it’s a..."", option_a="Cruise ship", option_b="Battleship", option_c="Fishing boat", correct_answer="A")
+        ]
         db.session.add_all(questions)
         db.session.commit()
 
-    # Register students
     student_names = [
-    "Alao Victor Oluwatayemise",
-    "AKERELE Ifedayo David",
-    "ADEYEMO Olalekan",
-    "OGEDENGBE John",
-    "ODEJOBI Deborah",
-    "OYEKALE Susannah",
-    "OGUNSOLA Toluwaniyin",
-    "OJO Kehinde",
-    "OLATUNJI Victor",
-    "ISHOLA Tolamise",
-    "Olaniyi Oluwafunbi",
-    "ADEKOYA KEHINDE OLUWASEUN",
-    "Ojediran Jeremiah"
-]
+        "Alao Victor Oluwatayemise",
+        "AKERELE Ifedayo David",
+        "ADEYEMO Olalekan",
+        "OGEDENGBE John",
+        "ODEJOBI Deborah",
+        "OYEKALE Susannah",
+        "OGUNSOLA Toluwaniyin",
+        "OJO Kehinde",
+        "OLATUNJI Victor",
+        "ISHOLA Tolamise",
+        "Olaniyi Oluwafunbi",
+        "ADEKOYA KEHINDE OLUWASEUN",
+        "Ojediran Jeremiah"
+    ]
 
     for name in student_names:
         if not User.query.filter_by(username=name).first():
-            db.session.add(User(username=name, password=name))
+            hashed_pw = generate_password_hash(name)
+            db.session.add(User(username=name, password=hashed_pw))
     db.session.commit()
 
-# Home/Login
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        if user and user.password.lower() == password.lower():
+        if user and check_password_hash(user.password, password):
             session['user_id'] = user.id
             if user.attempted:
                 return "You have already attempted this exam."
@@ -92,7 +96,6 @@ def login():
         return "Invalid credentials."
     return render_template('login.html')
 
-# Exam Page
 @app.route('/exam')
 def exam():
     if 'user_id' not in session:
@@ -100,7 +103,6 @@ def exam():
     questions = Question.query.all()
     return render_template('exam.html', questions=questions)
 
-# Submit Exam
 @app.route('/submit', methods=['POST'])
 def submit():
     user = User.query.get(session['user_id'])
@@ -116,37 +118,70 @@ def submit():
     session.pop('user_id', None)
     return render_template('result.html', score=score, total=len(questions))
 
-# Admin view to see all scores
+@app.route('/log_tab_switch', methods=['POST'])
+def log_tab_switch():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        user.tab_switches += 1
+        user.last_tab_switch = datetime.datetime.now()
+        db.session.commit()
+    return ('', 204)
+
+@app.route('/admin-login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username == "admin" and password == "adminpass":
+            session['admin'] = True
+            return redirect(url_for('admin'))
+        return "Invalid admin login."
+    return '''
+    <form method="post">
+        <input name="username" placeholder="Admin Username" required>
+        <input name="password" placeholder="Password" type="password" required>
+        <input type="submit">
+    </form>
+    '''
+
 @app.route('/admin')
 def admin():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
     users = User.query.all()
     return render_template('admin.html', users=users)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
 
 """
-templates/admin.html
----------------------
-<!DOCTYPE html>
-<html>
-<head><title>Admin - Results</title></head>
-<body>
-    <h2>Exam Results</h2>
-    <table border="1">
-        <tr>
-            <th>Full Name</th>
-            <th>Score</th>
-            <th>Attempted</th>
-        </tr>
-        {% for user in users %}
-        <tr>
-            <td>{{ user.username }}</td>
-            <td>{{ user.score }}</td>
-            <td>{{ 'Yes' if user.attempted else 'No' }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-</body>
-</html>
+templates/exam.html JavaScript (insert at end of <body>):
+---------------------------------------------------------
+<script>
+let switchCount = 0;
+let warningIssued = false;
+
+function logTabSwitch() {
+    fetch('/log_tab_switch', {method: 'POST'});
+}
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        switchCount++;
+        logTabSwitch();
+        if (!warningIssued) {
+            alert("Tab switch detected! Please return. Exam will auto-submit on second switch.");
+            warningIssued = true;
+        } else {
+            alert("Second switch detected! Exam auto-submitting.");
+            document.getElementById("examForm").submit();
+        }
+    }
+});
+
+document.addEventListener("contextmenu", event => event.preventDefault());
+document.onkeydown = function(e) {
+    if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u')) return false;
+};
+</script>
 """
