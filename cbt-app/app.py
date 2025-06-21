@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import datetime
@@ -13,7 +12,6 @@ app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_PERMANENT'] = False
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 
 # Database models
 class User(db.Model):
@@ -33,7 +31,7 @@ class Question(db.Model):
     option_c = db.Column(db.String(100))
     correct_answer = db.Column(db.String(1))  # 'A', 'B', 'C'
 
-# Create DB and seed questions and users
+# Create DB and seed data
 with app.app_context():
     db.create_all()
     if not Question.query.first():
@@ -57,7 +55,7 @@ with app.app_context():
             Question(text="What is the devil not afraid of?", option_a="Programs", option_b="Holy men", option_c="Fasting", correct_answer="A"),
             Question(text="Where did Ravenhill say true revival starts?", option_a="In churches", option_b="In seminars", option_c="In hearts", correct_answer="C"),
             Question(text="What makes a sermon powerful, according to Ravenhill?", option_a="Length", option_b="Delivery", option_c="Burden", correct_answer="C"),
-            Question(text="Ravenhill said, 'The church used to be a lifeboat, now it’s a...", option_a="Cruise ship", option_b="Battleship", option_c="Fishing boat", correct_answer="A")
+            Question(text="Ravenhill said, 'The church used to be a lifeboat, now it’s a...'", option_a="Cruise ship", option_b="Battleship", option_c="Fishing boat", correct_answer="A")
         ]
         db.session.add_all(questions)
         db.session.commit()
@@ -155,35 +153,3 @@ def admin():
 
 if __name__ == '__main__':
     app.run(debug=False)
-
-"""
-templates/exam.html JavaScript (insert at end of <body>):
----------------------------------------------------------
-<script>
-let switchCount = 0;
-let warningIssued = false;
-
-function logTabSwitch() {
-    fetch('/log_tab_switch', {method: 'POST'});
-}
-
-document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-        switchCount++;
-        logTabSwitch();
-        if (!warningIssued) {
-            alert("Tab switch detected! Please return. Exam will auto-submit on second switch.");
-            warningIssued = true;
-        } else {
-            alert("Second switch detected! Exam auto-submitting.");
-            document.getElementById("examForm").submit();
-        }
-    }
-});
-
-document.addEventListener("contextmenu", event => event.preventDefault());
-document.onkeydown = function(e) {
-    if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u')) return false;
-};
-</script>
-"""
