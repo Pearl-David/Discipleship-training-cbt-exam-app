@@ -1,75 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>CBT Exam</title>
+    <meta charset="UTF-8">
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             padding: 20px;
         }
-        .question-box {
-            background-color: white;
-            padding: 15px;
+        .question-block {
             margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
         }
-        h2 {
-            color: #333;
-        }
-        button {
-            padding: 10px 20px;
+        .question-text {
             font-weight: bold;
-            background-color: #28a745;
+        }
+        .submit-btn {
+            padding: 10px 20px;
+            background-color: #007BFF;
             color: white;
             border: none;
-            border-radius: 6px;
+            font-size: 16px;
             cursor: pointer;
         }
-    </style>
-</head>
-<body>
-    <h2>Online CBT Examination</h2>
-    <form id="examForm" method="post" action="/submit">
-        {% for q in questions %}
-            <div class="question-box">
-                <p><strong>Q{{ loop.index }}:</strong> {{ q.text }}</p>
-                <input type="radio" name="q{{ q.id }}" value="A" required> A. {{ q.option_a }}<br>
-                <input type="radio" name="q{{ q.id }}" value="B"> B. {{ q.option_b }}<br>
-                <input type="radio" name="q{{ q.id }}" value="C"> C. {{ q.option_c }}<br>
-            </div>
-        {% endfor %}
-        <button type="submit">Submit Exam</button>
-    </form>
-
-    <script>
-        let switchCount = 0;
-        let warningIssued = false;
-
-        function logTabSwitch() {
-            fetch('/log_tab_switch', { method: 'POST' });
+        .submit-btn:hover {
+            background-color: #0056b3;
         }
+    </style>
+    <script>
+        let hasWarned = false;
 
-        document.addEventListener("visibilitychange", () => {
+        document.addEventListener('visibilitychange', function () {
             if (document.hidden) {
-                switchCount++;
-                logTabSwitch();
-                if (!warningIssued) {
-                    alert("Tab switch detected! Please return. Exam will auto-submit on second switch.");
-                    warningIssued = true;
-                } else {
-                    alert("Second switch detected! Exam auto-submitting.");
-                    document.getElementById("examForm").submit();
-                }
+                fetch("/track-tab", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }).then(res => {
+                    if (!hasWarned) {
+                        alert("Tab switch detected! This may lead to disqualification.");
+                        hasWarned = true;
+                    }
+                });
             }
         });
-
-        document.addEventListener("contextmenu", event => event.preventDefault());
-        document.onkeydown = function(e) {
-            if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u')) return false;
-        };
     </script>
+</head>
+<body>
+    <h1>CBT Exam - Discipleship Training</h1>
+    <form method="POST">
+        {% for q in questions %}
+        <div class="question-block">
+            <div class="question-text">{{ loop.index }}. {{ q.text }}</div>
+            <label><input type="radio" name="{{ q.id }}" value="A"> {{ q.option_a }}</label><br>
+            <label><input type="radio" name="{{ q.id }}" value="B"> {{ q.option_b }}</label><br>
+            {% if q.option_c %}
+            <label><input type="radio" name="{{ q.id }}" value="C"> {{ q.option_c }}</label><br>
+            {% endif %}
+            {% if q.option_d %}
+            <label><input type="radio" name="{{ q.id }}" value="D"> {{ q.option_d }}</label><br>
+            {% endif %}
+            {% if q.option_e %}
+            <label><input type="radio" name="{{ q.id }}" value="E"> {{ q.option_e }}</label><br>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="submit-btn">Submit Exam</button>
+    </form>
 </body>
 </html>
