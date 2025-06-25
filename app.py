@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import datetime
@@ -12,8 +13,8 @@ app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_PERMANENT'] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
-# Database models
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -29,127 +30,139 @@ class Question(db.Model):
     option_a = db.Column(db.String(100))
     option_b = db.Column(db.String(100))
     option_c = db.Column(db.String(100))
-    correct_answer = db.Column(db.String(1))  # 'A', 'B', 'C'
+    correct_answer = db.Column(db.String(1))
 
-# Create DB and seed data
+@app.route('/track-tab', methods=['POST'])
+def track_tab():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        if user:
+            user.tab_switches += 1
+            user.last_tab_switch = datetime.datetime.now()
+            db.session.commit()
+            return jsonify({"status": "updated"}), 200
+    return jsonify({"status": "unauthorized"}), 401
+
 with app.app_context():
     db.create_all()
     if not Question.query.first():
-        questions = [
-            Question(text="Who replaced Judas Iscariot as a disciple?", option_a="Matthias", option_b="Barnabas", option_c="Stephen", correct_answer="A"),
-            Question(text="Where did the Holy Spirit descend on the apostles?", option_a="Upper Room", option_b="Synagogue", option_c="Temple", correct_answer="A"),
-            Question(text="What appeared over the apostles' heads on Pentecost?", option_a="Smoke", option_b="Flames", option_c="Water", correct_answer="B"),
-            Question(text="What was Paul's original name?", option_a="Simon", option_b="Saul", option_c="Silas", correct_answer="B"),
-            Question(text="Who was stoned while Paul watched?", option_a="Stephen", option_b="Barnabas", option_c="Peter", correct_answer="A"),
-            Question(text="Where was Paul when he encountered Jesus?", option_a="Damascus", option_b="Jerusalem", option_c="Rome", correct_answer="A"),
-            Question(text="Who healed the lame man at the temple gate?", option_a="Peter & John", option_b="Paul", option_c="Stephen", correct_answer="A"),
-            Question(text="How many people were added to the church on Pentecost?", option_a="3000", option_b="120", option_c="5000", correct_answer="A"),
-            Question(text="What was the name of the sorcerer in Acts 8?", option_a="Simon", option_b="Elymas", option_c="Bar-Jesus", correct_answer="A"),
-            Question(text="What was Paul's profession?", option_a="Fisherman", option_b="Tentmaker", option_c="Carpenter", correct_answer="B"),
-            Question(text="Why does Ravenhill say revival tarries?", option_a="Because people don't pray", option_b="Because God delays", option_c="Because of politics", correct_answer="A"),
-            Question(text="What does Ravenhill call the missing element in modern preaching?", option_a="Humor", option_b="Anointing", option_c="Fire", correct_answer="C"),
-            Question(text="What must a man do before God will use him mightily?", option_a="Be educated", option_b="Be broken", option_c="Be famous", correct_answer="B"),
-            Question(text="What did Ravenhill say the church lacks today?", option_a="Strategy", option_b="Power", option_c="Money", correct_answer="B"),
-            Question(text="What kind of men does God use?", option_a="Gifted men", option_b="Smart men", option_c="Broken men", correct_answer="C"),
-            Question(text="What did Ravenhill say we need more than revival meetings?", option_a="Prayer meetings", option_b="Miracles", option_c="Money", correct_answer="A"),
-            Question(text="What is the devil not afraid of?", option_a="Programs", option_b="Holy men", option_c="Fasting", correct_answer="A"),
-            Question(text="Where did Ravenhill say true revival starts?", option_a="In churches", option_b="In seminars", option_c="In hearts", correct_answer="C"),
-            Question(text="What makes a sermon powerful, according to Ravenhill?", option_a="Length", option_b="Delivery", option_c="Burden", correct_answer="C"),
-            Question(text="Ravenhill said, 'The church used to be a lifeboat, now it’s a...'", option_a="Cruise ship", option_b="Battleship", option_c="Fishing boat", correct_answer="A")
+        question_data =  [
+            # Original 40 questions
+            ("God's infallible WORD teaches & we believe:", "Bible doctrines", "Discipleship teachings", "Repentance only", "A"),
+            ("What is Bible doctrine 5?", "The Godhead", "Repentance", "Justification", "A"),
+            ("The Bible is _____", "God's will", "God's word", "God's own", "B"),
+            ("____ will occur after the rapture.", "Justification", "The Great tribulation", "Peace & Joy in the world", "B"),
+            ("What is Bible doctrine 8?", "The Lord's supper", "Water baptism", "The Holy Bible", "B"),
+            ("Is Bible doctrine 3 known to be 'The Virgin birth of Jesus'?", "False", "True", "None of the above", "B"),
+            ("The redeemed shall dwell with _____ forever.", "satan", "spirit", "God", "C"),
+            ("_____ was prepared for the devil & his angels.", "Punishment", "evils", "hell fire", "C"),
+            ("The Bible teaches that man is totally depraved.", "Yes", "No", "Yes & no", "A"),
+            ("Where is God expecting you to spend eternity with HIM?", "Heaven", "Hell", "the world", "A"),
+            ("The last session of the Bible doctrine is known as", "Revelations", "Eschatology", "Eternity", "B"),
+            ("What is Bible doctrine 1?", "The Godhead", "The Holy Bible", "Restitution", "B"),
+            ("______ is the act of God's grace whereby one's sins are forgiven...", "Restitution", "Righteousness", "Justification", "C"),
+            ("The Bible teaches that Jesus Christ was born of a virgin.", "False", "True", "partially correct", "B"),
+            ("What is Bible doctrine 15?", "The rapture", "Repentance", "Restitution", "A"),
+            ("What is the last Bible doctrine focused on?", "Hell fire", "Rapture", "Heaven", "C"),
+            ("How many Bible doctrines have we?", "24", "20", "22", "C"),
+            ("What is Bible doctrine 12?", "Redemption healing and health", "Entire sanctification", "Prayer", "A"),
+            ("The Holy Bible consists of_____ books of the New Testament.", "39", "37", "27", "C"),
+            ("Bible doctrine 9 is", "The Lord's supper", "Heaven", "Eternity", "A"),
+            ("Fasting is an optional activity for a Christian.", "True", "False", "", "B"),
+            ("The first account of the disciples receiving the Holy Ghost baptism...", "Acts 1:8", "Acts 2:1–4", "Mark 16:15", "B"),
+            ("'Love not the world...' can be found where?", "John 15:1", "1 John 3:1", "1 John 2:15", "C"),
+            ("All but one of the following hinders an effective quiet time:", "Dancing", "Gluttony", "Fatigue", "A"),
+            ("The following are hindrances to benefiting from the Bible except:", "Unbelief", "Double-mindedness", "Reading", "D"),
+            ("'Fishers of men' is a figurative expression meaning:", "Catching fishes", "Soul winning", "Quiet time", "B"),
+            ("One of these is not a definition of sanctification:", "Removal of sin", "Holiness", "The third work of grace", "C"),
+            ("Justification comes after:", "Sinning", "Salvation", "Sanctification", "B"),
+            ("Which of these should we give less priority to?", "Spiritual life", "Skill acquisition", "Social media", "D"),
+            ("The property in church should be treated as our own.", "True", "False", "", "A"),
+            ("Which is not a gift of the Spirit?", "Gentleness", "Faith", "Working of miracles", "A"),
+            ("Way God can speak to us in knowing His will in marriage:", "Cohabitating", "Deep love", "Through a prophet", "B"),
+            ("Another name for pseudo-Christianity is:", "Sudden Christianity", "False Christianity", "Imperfect Christianity", "B"),
+            ("The knowledge of homiletics is needed for every Christian.", "True", "False", "", "A"),
+            ("God is interested in our finances as our spiritual life.", "No", "Sometimes", "Yes", "D"),
+            ("All but one is a gesture to avoid with opposite gender:", "Hugging", "Isolated places", "Sitting close", "C"),
+            ("Fasting must be accompanied by one of these:", "Shouting", "Praying", "Listening", "B"),
+            ("Not a prerequisite for receiving Holy Ghost baptism:", "Salvation", "Sanctification", "Gymnastics", "C"),
+            ("Worldliness is okay for me:", "No", "Yes", "Sometimes", "A"),
+            ("An example of Christian dressing:", "Tight trousers", "Jewelry", "Moderate trousers", "E"),
+
+            # New 20 questions (Acts + Ravenhill)
+            ("Who replaced Judas Iscariot as a disciple?", "Matthias", "Barnabas", "Stephen", "A"),
+            ("Where did the Holy Spirit descend on the apostles?", "Upper Room", "Synagogue", "Temple", "A"),
+            ("What appeared over the apostles' heads on Pentecost?", "Smoke", "Flames", "Water", "B"),
+            ("What was Paul's original name?", "Simon", "Saul", "Silas", "B"),
+            ("Who was stoned while Paul watched?", "Stephen", "Barnabas", "Peter", "A"),
+            ("Where was Paul when he encountered Jesus?", "Damascus", "Jerusalem", "Rome", "A"),
+            ("Who healed the lame man at the temple gate?", "Peter & John", "Paul", "Stephen", "A"),
+            ("How many people were added to the church on Pentecost?", "3000", "120", "5000", "A"),
+            ("What was the name of the sorcerer in Acts 8?", "Simon", "Elymas", "Bar-Jesus", "A"),
+            ("What was Paul's profession?", "Fisherman", "Tentmaker", "Carpenter", "B"),
+            ("Why does Ravenhill say revival tarries?", "Because people don't pray", "Because God delays", "Because of politics", "A"),
+            ("What does Ravenhill call the missing element in modern preaching?", "Humor", "Anointing", "Fire", "C"),
+            ("What must a man do before God will use him mightily?", "Be educated", "Be broken", "Be famous", "B"),
+            ("What did Ravenhill say the church lacks today?", "Strategy", "Power", "Money", "B"),
+            ("What kind of men does God use?", "Gifted men", "Smart men", "Broken men", "C"),
+            ("What did Ravenhill say we need more than revival meetings?", "Prayer meetings", "Miracles", "Money", "A"),
+            ("What is the devil not afraid of?", "Programs", "Holy men", "Fasting", "A"),
+            ("Where did Ravenhill say true revival starts?", "In churches", "In seminars", "In hearts", "C"),
+            ("What makes a sermon powerful, according to Ravenhill?", "Length", "Delivery", "Burden", "C"),
+            ("Ravenhill said, 'The church used to be a lifeboat, now it’s a...'", "Cruise ship", "Battleship", "Fishing boat", "A")
         ]
+
+        questions = [Question(text=q[0], option_a=q[1], option_b=q[2], option_c=q[3], correct_answer=q[4]) for q in question_data]
         db.session.add_all(questions)
         db.session.commit()
 
-    student_names = [
-        "Alao Victor Oluwatayemise",
-        "AKERELE Ifedayo David",
-        "ADEYEMO Olalekan",
-        "OGEDENGBE John",
-        "ODEJOBI Deborah",
-        "OYEKALE Susannah",
-        "OGUNSOLA Toluwaniyin",
-        "OJO Kehinde",
-        "OLATUNJI Victor",
-        "ISHOLA Tolamise",
-        "Olaniyi Oluwafunbi",
-        "ADEKOYA KEHINDE OLUWASEUN",
-        "Ojediran Jeremiah"
-    ]
-
+    student_names = ["Alao Victor Oluwatayemise", "John Doe", "Jane Smith", "Peter Johnson", "Mary Adams", "Samuel Oladele", "Grace Adebayo", "Daniel Okonkwo", "Mercy Omotola", "Emmanuel Adeola", "Deborah Oke", "David Benson", "Esther Akande"]
     for name in student_names:
         if not User.query.filter_by(username=name).first():
             hashed_pw = generate_password_hash(name)
             db.session.add(User(username=name, password=hashed_pw))
     db.session.commit()
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
+def index():
+    return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
-        password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password, password):
+        if user and check_password_hash(user.password, username):
             session['user_id'] = user.id
-            if user.attempted:
-                return "You have already attempted this exam."
             return redirect(url_for('exam'))
-        return "Invalid credentials."
+        return render_template('login.html', error='Invalid credentials')
     return render_template('login.html')
 
-@app.route('/exam')
+@app.route('/exam', methods=['GET', 'POST'])
 def exam():
     if 'user_id' not in session:
         return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    if user.attempted:
+        return "You have already attempted the exam."
+
     questions = Question.query.all()
+    if request.method == 'POST':
+        score = 0
+        for q in questions:
+            selected = request.form.get(str(q.id))
+            if selected == q.correct_answer:
+                score += 1
+        user.score = score
+        user.attempted = True
+        db.session.commit()
+        return f"Your score is: {score}/{len(questions)}"
     return render_template('exam.html', questions=questions)
 
-@app.route('/submit', methods=['POST'])
-def submit():
-    user = User.query.get(session['user_id'])
-    questions = Question.query.all()
-    score = 0
-    for q in questions:
-        user_answer = request.form.get(f'q{q.id}')
-        if user_answer == q.correct_answer:
-            score += 1
-    user.score = score
-    user.attempted = True
-    db.session.commit()
-    session.pop('user_id', None)
-    return render_template('result.html', score=score, total=len(questions))
-
-@app.route('/log_tab_switch', methods=['POST'])
-def log_tab_switch():
-    if 'user_id' in session:
-        user = User.query.get(session['user_id'])
-        user.tab_switches += 1
-        user.last_tab_switch = datetime.datetime.now()
-        db.session.commit()
-    return ('', 204)
-
-@app.route('/admin-login', methods=['GET', 'POST'])
-def admin_login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        if username == "admin" and password == "adminpass":
-            session['admin'] = True
-            return redirect(url_for('admin'))
-        return "Invalid admin login."
-    return '''
-    <form method="post">
-        <input name="username" placeholder="Admin Username" required>
-        <input name="password" placeholder="Password" type="password" required>
-        <input type="submit">
-    </form>
-    '''
-
-@app.route('/admin')
-def admin():
-    if not session.get('admin'):
-        return redirect(url_for('admin_login'))
-    users = User.query.all()
-    return render_template('admin.html', users=users)
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run(debug=False)
