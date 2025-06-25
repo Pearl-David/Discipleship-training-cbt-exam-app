@@ -144,6 +144,26 @@ def admin_login():
     </form>
     '''
 
+@app.route('/admin-login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username == 'DLCF' and password == 'excos':
+            session['admin'] = True
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return render_template('admin_login.html', error='Invalid admin credentials')
+    return render_template('admin_login.html')
+
+@app.route('/admin')
+def admin_dashboard():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    users = User.query.all()
+    return render_template('admin.html', users=users)
+
+
 @app.route('/admin')
 def admin():
     if not session.get('admin'):
