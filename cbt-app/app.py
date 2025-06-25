@@ -151,5 +151,11 @@ def admin():
     users = User.query.all()
     return render_template('admin.html', users=users)
 
+@app.route('/admin')
+def admin_dashboard():
+    users = User.query.all()
+    return render_template('admin.html', users=users)
+
+
 if __name__ == '__main__':
     app.run(debug=False)
