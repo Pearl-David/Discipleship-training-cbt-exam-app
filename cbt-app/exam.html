@@ -2,72 +2,102 @@
 <html>
 <head>
     <title>CBT Exam</title>
-    <meta charset="UTF-8">
     <style>
         body {
             font-family: Arial, sans-serif;
+            background: #f4f4f4;
             padding: 20px;
         }
-        .question-block {
-            margin-bottom: 20px;
-            padding: 10px;
-            border-bottom: 1px solid #ccc;
+        h1 {
+            text-align: center;
+            color: #333;
         }
-        .question-text {
-            font-weight: bold;
+        .question {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .question p {
+            margin: 0 0 10px;
         }
         .submit-btn {
-            padding: 10px 20px;
-            background-color: #007BFF;
+            background-color: #007bff;
             color: white;
             border: none;
+            padding: 12px 20px;
             font-size: 16px;
             cursor: pointer;
+            border-radius: 6px;
+            display: block;
+            margin: 20px auto;
         }
         .submit-btn:hover {
             background-color: #0056b3;
         }
     </style>
-    <script>
-        let hasWarned = false;
-
-        document.addEventListener('visibilitychange', function () {
-            if (document.hidden) {
-                fetch("/track-tab", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                }).then(res => {
-                    if (!hasWarned) {
-                        alert("Tab switch detected! This may lead to disqualification.");
-                        hasWarned = true;
-                    }
-                });
-            }
-        });
-    </script>
 </head>
 <body>
-    <h1>CBT Exam - Discipleship Training</h1>
-    <form method="POST">
+
+    <h1>DISCIPLESHIP TRAINING '25 CBT EXAM</h1>
+
+    <form method="post">
         {% for q in questions %}
-        <div class="question-block">
-            <div class="question-text">{{ loop.index }}. {{ q.text }}</div>
-            <label><input type="radio" name="{{ q.id }}" value="A"> {{ q.option_a }}</label><br>
-            <label><input type="radio" name="{{ q.id }}" value="B"> {{ q.option_b }}</label><br>
-            {% if q.option_c %}
-            <label><input type="radio" name="{{ q.id }}" value="C"> {{ q.option_c }}</label><br>
-            {% endif %}
-            {% if q.option_d %}
-            <label><input type="radio" name="{{ q.id }}" value="D"> {{ q.option_d }}</label><br>
-            {% endif %}
-            {% if q.option_e %}
-            <label><input type="radio" name="{{ q.id }}" value="E"> {{ q.option_e }}</label><br>
-            {% endif %}
-        </div>
+            <div class="question">
+                <p><strong>Q{{ loop.index }}:</strong> {{ q.text }}</p>
+                <label><input type="radio" name="{{ q.id }}" value="A"> A. {{ q.option_a }}</label><br>
+                <label><input type="radio" name="{{ q.id }}" value="B"> B. {{ q.option_b }}</label><br>
+                {% if q.option_c %}
+                <label><input type="radio" name="{{ q.id }}" value="C"> C. {{ q.option_c }}</label><br>
+                {% endif %}
+            </div>
         {% endfor %}
-        <button type="submit" class="submit-btn">Submit Exam</button>
+        <button type="submit" class="submit-btn">Submit Answers</button>
     </form>
+
+    <!-- Countdown Timer and Anti-Cheat JS -->
+    <script>
+        let totalSeconds = 60 * 60; // 60 minutes
+        const timerDisplay = document.createElement('div');
+        timerDisplay.style.position = 'fixed';
+        timerDisplay.style.top = '10px';
+        timerDisplay.style.right = '10px';
+        timerDisplay.style.backgroundColor = '#f8d7da';
+        timerDisplay.style.color = '#721c24';
+        timerDisplay.style.padding = '10px';
+        timerDisplay.style.fontWeight = 'bold';
+        timerDisplay.style.borderRadius = '8px';
+        timerDisplay.innerText = "60:00";
+        document.body.appendChild(timerDisplay);
+
+        function updateTimer() {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            timerDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            if (totalSeconds <= 0) {
+                clearInterval(timerInterval);
+                alert("Time is up! Submitting your answers...");
+                document.querySelector('form').submit();
+            }
+            totalSeconds--;
+        }
+
+        const timerInterval = setInterval(updateTimer, 1000);
+
+        // Tab switch / split screen detection
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                fetch("/track-tab", { method: "POST" });
+                alert("Tab switch or app minimized detected! Be careful.");
+            }
+        });
+
+        window.addEventListener("blur", () => {
+            fetch("/track-tab", { method: "POST" });
+            alert("Focus lost (possible split screen or app switch)!");
+        });
+    </script>
+
 </body>
 </html>
