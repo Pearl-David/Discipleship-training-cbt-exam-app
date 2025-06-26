@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CBT Exam</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        h2 {
+            text-align: center;
+        }
+        .submit-btn {
+            display: block;
+            margin: 20px auto;
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>CBT Exam</h2>
+        <form method="POST" action="/submit" id="examForm">
+            {% for q in questions %}
+                <div class="question">
+                    <p><strong>{{ loop.index }}. {{ q.text }}</strong></p>
+                    <label><input type="radio" name="q{{ q.id }}" value="A" required> A. {{ q.option_a }}</label><br>
+                    <label><input type="radio" name="q{{ q.id }}" value="B"> B. {{ q.option_b }}</label><br>
+                    <label><input type="radio" name="q{{ q.id }}" value="C"> C. {{ q.option_c }}</label>
+                </div>
+            {% endfor %}
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+    </div>
+
+    <!-- 🔐 Anti-Malpractice Script -->
+    <script>
+    let switchCount = 0;
+    let warningIssued = false;
+
+    function logTabSwitch() {
+        fetch('/log_tab_switch', {method: 'POST'});
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            switchCount++;
+            logTabSwitch();
+            if (!warningIssued) {
+                alert("⚠️ Tab switch detected! Please return. Exam will auto-submit on second switch.");
+                warningIssued = true;
+            } else {
+                alert("⛔ Second switch detected! Submitting exam now.");
+                document.getElementById("examForm").submit();
+            }
+        }
+    });
+
+    document.addEventListener("contextmenu", event => event.preventDefault());
+    document.onkeydown = function(e) {
+        if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u')) return false;
+    };
+    </script>
+</body>
+</html>

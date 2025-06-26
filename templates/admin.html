@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>Admin - Results</title></head>
+<body>
+    <h2>Exam Results</h2>
+    <table border="1">
+        <tr>
+            <th>Full Name</th>
+            <th>Score</th>
+            <th>Attempted</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.username }}</td>
+            <td>{{ user.score }}</td>
+            <td>{{ 'Yes' if user.attempted else 'No' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
