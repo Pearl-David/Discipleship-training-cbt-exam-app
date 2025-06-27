@@ -116,7 +116,7 @@ with app.app_context():
         db.session.add_all(questions)
         db.session.commit()
 
-    student_names = [
+            student_names = [
         "Alao Victor Oluwatayemise", "John Doe", "Jane Smith", "Peter Johnson", "Mary Adams", "Samuel Oladele", "Grace Adebayo", "Daniel Okonkwo", "Mercy Omotola", "Emmanuel Adeola", "Deborah Oke", "David Benson", "Esther Akande",
         "OLAOYE Oluwadarasimi", "OYATUNDE DAMILOLA IREMIDE", "Oyedemi Emmanuel Oyeleke", "AKHIGBE Prevail Caleb", "Olanrewaju Isaiah", "OLATUNJI Emmanuel Oladeji", "ADELEKE PETER INIOLUWA", "PAUL", "AKINOlA Faith Testimony",
         "Israel Temiloluwa OGUNSOLA", "Adikwu John", "Adebayo Victor Oluwabori", "ADENIRAN TEMIDAYO PRAISE", "AFOLABI john ayomide", "Ojo Rebecca Oluwafunmilola", "AJALA Caleb", "ADEWALE Jerry Ayomide", "AYOOLA BLESSING TITILADE",
@@ -135,6 +135,7 @@ with app.app_context():
             hashed_pw = generate_password_hash(name)
             db.session.add(User(username=name, password=hashed_pw))
     db.session.commit()
+
 
 
 @app.route('/')
@@ -174,12 +175,37 @@ def exam():
 
     return render_template('exam.html', questions=questions)  # Only for GET request
 
-s)
+
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+@app.route('/admin-login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username == 'DLCF' and password == 'excos':
+            session['admin'] = True
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return render_template('admin_login.html', error='Invalid admin credentials')
+    return render_template('admin_login.html')
+
+@app.route('/admin')
+def admin_dashboard():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    users = User.query.all()
+    return render_template('admin.html', users=users)
+
+
+@app.route('/admin')
+def admin_dashboard():
+    users = User.query.all()
+    return render_template('admin.html', users=users)
 
 import os
 
