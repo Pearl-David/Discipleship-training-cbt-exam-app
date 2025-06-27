@@ -45,7 +45,9 @@ def track_tab():
 
 with app.app_context():
     db.create_all()
+
     if not Question.query.first():
+        # Add your question_data list here
         question_data =  [
             # Original 40 questions
             ("God's infallible WORD teaches & we believe:", "Bible doctrines", "Discipleship teachings", "Repentance only", "A"),
@@ -112,13 +114,14 @@ with app.app_context():
             ("Ravenhill said, 'The church used to be a lifeboat, now it’s a...'", "Cruise ship", "Battleship", "Fishing boat", "A")
         ]
 
-        questions = [Question(text=q[0], option_a=q[1], option_b=q[2], option_c=q[3], correct_answer=q[4]) for q in question_data]
+        questions = [
+            Question(text=q[0], option_a=q[1], option_b=q[2], option_c=q[3], correct_answer=q[4])
+            for q in question_data
+        ]
         db.session.add_all(questions)
         db.session.commit()
 
-            # Place this just after imports or database setup
-
-student_names = [
+    student_names = [
     "Alao Victor Oluwatayemise", "John Doe", "Jane Smith", "Peter Johnson", "Mary Adams", "Samuel Oladele", "Grace Adebayo",
     "Daniel Okonkwo", "Mercy Omotola", "Emmanuel Adeola", "Deborah Oke", "David Benson", "Esther Akande",
     "OLAOYE Oluwadarasimi", "OYATUNDE DAMILOLA IREMIDE", "Oyedemi Emmanuel Oyeleke", "AKHIGBE Prevail Caleb",
@@ -143,15 +146,12 @@ student_names = [
     "Olaniran dorcas omolara", "OLADELE Abosede", "Bolarinwa Janet", "SHALOM GBADEBO OLUWAFEYISARA",
     "Raphael Temitope Good luck", "ADEBUNMI SUCCESS ADEOLA", "OGUNLADE Excellence", "AKERELE Ifedayo David",
     "Pearl David", "Ogundele Eunice", "Adebayo Enoch"
-]
-
+]  
     for name in student_names:
         if not User.query.filter_by(username=name).first():
             hashed_pw = generate_password_hash(name)
             db.session.add(User(username=name, password=hashed_pw))
     db.session.commit()
-
-
 
 @app.route('/')
 def index():
@@ -186,11 +186,9 @@ def exam():
         user.score = score
         user.attempted = True
         db.session.commit()
-        return render_template('result.html', score=score, total=len(questions))  # ✅ Correct
+        return render_template('result.html', score=score, total=len(questions))
 
-    return render_template('exam.html', questions=questions)  # Only for GET request
-
-
+    return render_template('exam.html', questions=questions)
 
 @app.route('/logout')
 def logout():
@@ -215,14 +213,6 @@ def admin_dashboard():
         return redirect(url_for('admin_login'))
     users = User.query.all()
     return render_template('admin.html', users=users)
-
-
-@app.route('/admin')
-def admin_dashboard():
-    users = User.query.all()
-    return render_template('admin.html', users=users)
-
-import os
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
