@@ -187,7 +187,7 @@ def admin_login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        if username == 'admin' and password == 'dts2025exam':
+        if username == 'DLCF' and password == 'excos':
             session['admin'] = True
             return redirect(url_for('admin_dashboard'))
         else:
