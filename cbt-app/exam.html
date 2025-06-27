@@ -36,6 +36,17 @@
         .submit-btn:hover {
             background-color: #0056b3;
         }
+
+        #timer {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            font-weight: bold;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
@@ -56,20 +67,11 @@
         <button type="submit" class="submit-btn">Submit Answers</button>
     </form>
 
-    <!-- Countdown Timer and Anti-Cheat JS -->
+    <div id="timer">60:00</div>
+
     <script>
         let totalSeconds = 60 * 60; // 60 minutes
-        const timerDisplay = document.createElement('div');
-        timerDisplay.style.position = 'fixed';
-        timerDisplay.style.top = '10px';
-        timerDisplay.style.right = '10px';
-        timerDisplay.style.backgroundColor = '#f8d7da';
-        timerDisplay.style.color = '#721c24';
-        timerDisplay.style.padding = '10px';
-        timerDisplay.style.fontWeight = 'bold';
-        timerDisplay.style.borderRadius = '8px';
-        timerDisplay.innerText = "60:00";
-        document.body.appendChild(timerDisplay);
+        const timerDisplay = document.getElementById('timer');
 
         function updateTimer() {
             const minutes = Math.floor(totalSeconds / 60);
@@ -77,14 +79,14 @@
             timerDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
             if (totalSeconds <= 0) {
                 clearInterval(timerInterval);
-                alert("Time is up! Submitting your answers...");
+                // Optional: remove alert if you don't want it
+                // alert("Time is up! Submitting your answers...");
                 document.querySelector('form').submit();
             }
             totalSeconds--;
         }
 
         const timerInterval = setInterval(updateTimer, 1000);
-
     </script>
 
 </body>
