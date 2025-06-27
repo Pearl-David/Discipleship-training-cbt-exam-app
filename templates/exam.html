@@ -36,8 +36,7 @@
         .submit-btn:hover {
             background-color: #0056b3;
         }
-
-        #timer {
+        .timer {
             position: fixed;
             top: 10px;
             right: 10px;
@@ -53,6 +52,8 @@
 
     <h1>DISCIPLESHIP TRAINING '25 CBT EXAM</h1>
 
+    <div class="timer" id="timer">60:00</div>
+
     <form method="POST" action="{{ url_for('exam') }}">
         {% for q in questions %}
             <div class="question">
@@ -67,20 +68,18 @@
         <button type="submit" class="submit-btn">Submit Answers</button>
     </form>
 
-    <div id="timer">60:00</div>
-
+    <!-- Countdown Timer -->
     <script>
         let totalSeconds = 60 * 60; // 60 minutes
-        const timerDisplay = document.getElementById('timer');
+        const timer = document.getElementById('timer');
 
         function updateTimer() {
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
-            timerDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            timer.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
             if (totalSeconds <= 0) {
                 clearInterval(timerInterval);
-                // Optional: remove alert if you don't want it
-                // alert("Time is up! Submitting your answers...");
+                alert("Time is up! Submitting your answers...");
                 document.querySelector('form').submit();
             }
             totalSeconds--;
