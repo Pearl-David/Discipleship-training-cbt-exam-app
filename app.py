@@ -33,17 +33,6 @@ class Question(db.Model):
     option_c = db.Column(db.String(100))
     correct_answer = db.Column(db.String(1))
 
-@app.route('/track-tab', methods=['POST'])
-def track_tab():
-    if 'user_id' in session:
-        user = User.query.get(session['user_id'])
-        if user:
-            user.tab_switches += 1
-            user.last_tab_switch = datetime.datetime.now()
-            db.session.commit()
-            return jsonify({"status": "updated"}), 200
-    return jsonify({"status": "unauthorized"}), 401
-
 with app.app_context():
     db.create_all()
 
