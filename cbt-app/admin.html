@@ -1,41 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Admin Dashboard</title>
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
+            background-color: #f1f8e9;
             padding: 20px;
         }
-        h1 {
-            margin-bottom: 20px;
+        h2 {
+            text-align: center;
+            color: #33691e;
         }
         table {
-            border-collapse: collapse;
             width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
         }
         th, td {
-            padding: 10px;
-            text-align: center;
             border: 1px solid #ccc;
+            padding: 12px;
+            text-align: center;
         }
         th {
-            background-color: #007BFF;
-            color: white;
+            background-color: #aed581;
+        }
+        tr:nth-child(even) {
+            background-color: #f9fbe7;
         }
     </style>
 </head>
 <body>
-    <h1>Admin Dashboard - Candidate Overview</h1>
+    <h2>📊 CBT Admin Dashboard</h2>
     <table>
         <thead>
             <tr>
-                <th>#</th>
-                <th>Username</th>
+                <th>S/N</th>
+                <th>Student Name</th>
+                <th>Attempted</th>
                 <th>Score</th>
-                <th>Attempted?</th>
-                <th>Tab Switches</th>
-                <th>Last Tab Switch</th>
             </tr>
         </thead>
         <tbody>
@@ -43,10 +47,8 @@
             <tr>
                 <td>{{ loop.index }}</td>
                 <td>{{ user.username }}</td>
-                <td>{{ user.score if user.score is not none else '-' }}</td>
                 <td>{{ 'Yes' if user.attempted else 'No' }}</td>
-                <td>{{ user.tab_switches }}</td>
-                <td>{{ user.last_tab_switch.strftime('%Y-%m-%d %H:%M:%S') if user.last_tab_switch else '-' }}</td>
+                <td>{{ user.score if user.attempted else '-' }}</td>
             </tr>
             {% endfor %}
         </tbody>
