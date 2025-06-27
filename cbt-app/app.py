@@ -116,20 +116,35 @@ with app.app_context():
         db.session.add_all(questions)
         db.session.commit()
 
-            student_names = [
-        "Alao Victor Oluwatayemise", "John Doe", "Jane Smith", "Peter Johnson", "Mary Adams", "Samuel Oladele", "Grace Adebayo", "Daniel Okonkwo", "Mercy Omotola", "Emmanuel Adeola", "Deborah Oke", "David Benson", "Esther Akande",
-        "OLAOYE Oluwadarasimi", "OYATUNDE DAMILOLA IREMIDE", "Oyedemi Emmanuel Oyeleke", "AKHIGBE Prevail Caleb", "Olanrewaju Isaiah", "OLATUNJI Emmanuel Oladeji", "ADELEKE PETER INIOLUWA", "PAUL", "AKINOlA Faith Testimony",
-        "Israel Temiloluwa OGUNSOLA", "Adikwu John", "Adebayo Victor Oluwabori", "ADENIRAN TEMIDAYO PRAISE", "AFOLABI john ayomide", "Ojo Rebecca Oluwafunmilola", "AJALA Caleb", "ADEWALE Jerry Ayomide", "AYOOLA BLESSING TITILADE",
-        "Oyebade Blessing Oluwapelumi", "OYEBOLA Ireoluwa Jeremiah", "MATTHEW Faith", "ERONMOSELE SHALOM OSETOKHAME", "ABIMBOLA GOODNESS OLUDAMOLA", "AKINWUMI Blessing Olajumoke", "OYEDEMI Favour Ayomikun",
-        "ADISA STEPHEN BABAFEMI", "KILANKO Oluwatobiloba .D.", "AYOOLA Bolanle", "OLAGOKE DANIEL OLORUNFEMI", "ABIMBOLA Hismercy Toluwani", "OKEDI FAVOUR OGHENETEGA", "Awodele Elizabeth praise", "SANUSI Kehinde johanah",
-        "OLUWANIMBE Faithful Oluwadara", "OYEBOLA Oreoluwa James", "BABALOLA Jeremiah Iniolu", "OLALEYE OLOLADE DEBORAH", "AJALA JERRY OLUWASEUN", "OWOLABI OLAMIDE PEACE", "OLUFEMI Joel Seyi", "AJAYI Goodness Paul",
-        "Adetunji Promise Ayomikun", "OWOLAWASE Simeon Olajide", "AJAYI ELIJAH OLUWASEGUN", "AYANTUNDE Patience Omowumi", "ALAGBE ABIGEAL ADEBOLA", "OLADIPUPO Paul Segun", "AREMU KEMI TAIWO", "ADEJUMO Joshua Oluwadamilare",
-        "Aderanti Adesewa Grace", "Olugbade ComFort", "AJIBADE TOLUWALASE PRAISE", "GODWIN PRAISE OBOR", "OJOELE Oluwaseun Ruth", "Olajide David Oluwaferanmi", "OLAMOYEGUN Oluwadamilola Dolapo", "ADEWUMI Deborah Ayomide",
-        "JOEL Favour", "OYEKUNLE Marcus Timileyin", "OYADIRAN Dorcas oluwadamisi", "OLAYANJU Archippus Oladayo", "ADEGOKE, Praise Moyinoluwa", "AGBOOLA FAVOUR ADEKEMI", "ADEBISI Feranmi Eunice", "ISHOLA Emmanuel Iseoluwa",
-        "KOLAWOLE VICTORY ATINUKE", "ALABI DEBORAH INIOLUWA", "ISAIAH Adebayo Adeeyo", "MATTHEW Precious Ibukunoluwa", "OYELEYE Gladys Oluwajuwonlo", "ODEBOWALE", "ANWO HERITAGE OLUWADAMILOLA", "ABOLADE MARVELLOUS OLAYEMI",
-        "Bamigboye Joshua boluwatife", "OCHIMANA Elijah Iko-Ojo", "OKE FAVOUR OLUWASEYI", "ADEGOKE", "OLANREWAJU MAYOWA JOHN", "OLADOJA GOD'SGLORY AYANFE", "Olaniran dorcas omolara", "OLADELE Abosede", "Bolarinwa Janet",
-        "SHALOM GBADEBO OLUWAFEYISARA", "Raphael Temitope Good luck", "ADEBUNMI SUCCESS ADEOLA", "OGUNLADE Excellence", "AKERELE Ifedayo David", "Pearl David", "Ogundele Eunice", "Adebayo Enoch"
-    ]
+            # Place this just after imports or database setup
+
+student_names = [
+    "Alao Victor Oluwatayemise", "John Doe", "Jane Smith", "Peter Johnson", "Mary Adams", "Samuel Oladele", "Grace Adebayo",
+    "Daniel Okonkwo", "Mercy Omotola", "Emmanuel Adeola", "Deborah Oke", "David Benson", "Esther Akande",
+    "OLAOYE Oluwadarasimi", "OYATUNDE DAMILOLA IREMIDE", "Oyedemi Emmanuel Oyeleke", "AKHIGBE Prevail Caleb",
+    "Olanrewaju Isaiah", "OLATUNJI Emmanuel Oladeji", "ADELEKE PETER INIOLUWA", "PAUL", "AKINOlA Faith Testimony",
+    "Israel Temiloluwa OGUNSOLA", "Adikwu John", "Adebayo Victor Oluwabori", "ADENIRAN TEMIDAYO PRAISE",
+    "AFOLABI john ayomide", "Ojo Rebecca Oluwafunmilola", "AJALA Caleb", "ADEWALE Jerry Ayomide", "AYOOLA BLESSING TITILADE",
+    "Oyebade Blessing Oluwapelumi", "OYEBOLA Ireoluwa Jeremiah", "MATTHEW Faith", "ERONMOSELE SHALOM OSETOKHAME",
+    "ABIMBOLA GOODNESS OLUDAMOLA", "AKINWUMI Blessing Olajumoke", "OYEDEMI Favour Ayomikun", "ADISA STEPHEN BABAFEMI",
+    "KILANKO Oluwatobiloba .D.", "AYOOLA Bolanle", "OLAGOKE DANIEL OLORUNFEMI", "ABIMBOLA Hismercy Toluwani",
+    "OKEDI FAVOUR OGHENETEGA", "Awodele Elizabeth praise", "SANUSI Kehinde johanah", "OLUWANIMBE Faithful Oluwadara",
+    "OYEBOLA Oreoluwa James", "BABALOLA Jeremiah Iniolu", "OLALEYE OLOLADE DEBORAH", "AJALA JERRY OLUWASEUN",
+    "OWOLABI OLAMIDE PEACE", "OLUFEMI Joel Seyi", "AJAYI Goodness Paul", "Adetunji Promise Ayomikun",
+    "OWOLAWASE Simeon Olajide", "AJAYI ELIJAH OLUWASEGUN", "AYANTUNDE Patience Omowumi", "ALAGBE ABIGEAL ADEBOLA",
+    "OLADIPUPO Paul Segun", "AREMU KEMI TAIWO", "ADEJUMO Joshua Oluwadamilare", "Aderanti Adesewa Grace",
+    "Olugbade ComFort", "AJIBADE TOLUWALASE PRAISE", "GODWIN PRAISE OBOR", "OJOELE Oluwaseun Ruth",
+    "Olajide David Oluwaferanmi", "OLAMOYEGUN Oluwadamilola Dolapo", "ADEWUMI Deborah Ayomide", "JOEL Favour",
+    "OYEKUNLE Marcus Timileyin", "OYADIRAN Dorcas oluwadamisi", "OLAYANJU Archippus Oladayo", "ADEGOKE, Praise Moyinoluwa",
+    "AGBOOLA FAVOUR ADEKEMI", "ADEBISI Feranmi Eunice", "ISHOLA Emmanuel Iseoluwa", "KOLAWOLE VICTORY ATINUKE",
+    "ALABI DEBORAH INIOLUWA", "ISAIAH Adebayo Adeeyo", "MATTHEW Precious Ibukunoluwa", "OYELEYE Gladys Oluwajuwonlo",
+    "ODEBOWALE", "ANWO HERITAGE OLUWADAMILOLA", "ABOLADE MARVELLOUS OLAYEMI", "Bamigboye Joshua boluwatife",
+    "OCHIMANA Elijah Iko-Ojo", "OKE FAVOUR OLUWASEYI", "ADEGOKE", "OLANREWAJU MAYOWA JOHN", "OLADOJA GOD'SGLORY AYANFE",
+    "Olaniran dorcas omolara", "OLADELE Abosede", "Bolarinwa Janet", "SHALOM GBADEBO OLUWAFEYISARA",
+    "Raphael Temitope Good luck", "ADEBUNMI SUCCESS ADEOLA", "OGUNLADE Excellence", "AKERELE Ifedayo David",
+    "Pearl David", "Ogundele Eunice", "Adebayo Enoch"
+]
+
     for name in student_names:
         if not User.query.filter_by(username=name).first():
             hashed_pw = generate_password_hash(name)
