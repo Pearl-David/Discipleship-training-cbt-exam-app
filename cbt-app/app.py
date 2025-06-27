@@ -146,7 +146,7 @@ with app.app_context():
     "OCHIMANA Elijah Iko-Ojo", "OKE FAVOUR OLUWASEYI", "ADEGOKE", "OLANREWAJU MAYOWA JOHN", "OLADOJA GOD'SGLORY AYANFE",
     "Olaniran dorcas omolara", "OLADELE Abosede", "Bolarinwa Janet", "SHALOM GBADEBO OLUWAFEYISARA",
     "Raphael Temitope Good luck", "ADEBUNMI SUCCESS ADEOLA", "OGUNLADE Excellence", "AKERELE Ifedayo David",
-    "Pearl David", "Ogundele Eunice", "Adebayo Enoch"
+    "Pearl David", "Ogundele Eunice", "Adebayo Enoch", "Ireoluwa Oyebola Jeremiah", "Aderibigbe, Marvellous Aduragbemi", "Adediran Victoria Oluwatobi"
 ]  
     for name in student_names:
         if not User.query.filter_by(username=name).first():
