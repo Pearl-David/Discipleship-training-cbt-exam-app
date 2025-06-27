@@ -170,8 +170,11 @@ def exam():
         user.score = score
         user.attempted = True
         db.session.commit()
-        return f"Your score is: {score}/{len(questions)}"
-    return render_template('exam.html', questions=questions)
+        return render_template('result.html', score=score, total=len(questions))  # ✅ Correct
+
+    return render_template('exam.html', questions=questions)  # Only for GET request
+
+s)
 
 @app.route('/logout')
 def logout():
