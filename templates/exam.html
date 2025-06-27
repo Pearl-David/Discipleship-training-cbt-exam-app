@@ -36,65 +36,56 @@
         .submit-btn:hover {
             background-color: #0056b3;
         }
+        #timer {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            font-weight: bold;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>DISCIPLESHIP TRAINING '25 CBT EXAM</h1>
+<h1>DISCIPLESHIP TRAINING '25 CBT EXAM</h1>
 
-    <!-- ✅ FIX: Correct form action -->
-    <form method="POST" action="{{ url_for('exam') }}">
-        {% for q in questions %}
-            <div class="question">
-                <p><strong>Q{{ loop.index }}:</strong> {{ q.text }}</p>
-                <label><input type="radio" name="{{ q.id }}" value="A"> A. {{ q.option_a }}</label><br>
-                <label><input type="radio" name="{{ q.id }}" value="B"> B. {{ q.option_b }}</label><br>
-                {% if q.option_c %}
-                <label><input type="radio" name="{{ q.id }}" value="C"> C. {{ q.option_c }}</label><br>
-                {% endif %}
-            </div>
-        {% endfor %}
-        <button type="submit" class="submit-btn">Submit Answers</button>
-    </form>
+<form method="POST" action="{{ url_for('exam') }}">
+    {% for q in questions %}
+        <div class="question">
+            <p><strong>Q{{ loop.index }}:</strong> {{ q.text }}</p>
+            <label><input type="radio" name="{{ q.id }}" value="A"> A. {{ q.option_a }}</label><br>
+            <label><input type="radio" name="{{ q.id }}" value="B"> B. {{ q.option_b }}</label><br>
+            {% if q.option_c %}
+            <label><input type="radio" name="{{ q.id }}" value="C"> C. {{ q.option_c }}</label><br>
+            {% endif %}
+        </div>
+    {% endfor %}
+    <button type="submit" class="submit-btn">Submit Answers</button>
+</form>
 
-    <!-- ✅ Timer and corrected tab switch tracker -->
-    <script>
-        let totalSeconds = 60 * 60; // 60 minutes
-        const timerDisplay = document.createElement('div');
-        timerDisplay.style.position = 'fixed';
-        timerDisplay.style.top = '10px';
-        timerDisplay.style.right = '10px';
-        timerDisplay.style.backgroundColor = '#f8d7da';
-        timerDisplay.style.color = '#721c24';
-        timerDisplay.style.padding = '10px';
-        timerDisplay.style.fontWeight = 'bold';
-        timerDisplay.style.borderRadius = '8px';
-        timerDisplay.innerText = "60:00";
-        document.body.appendChild(timerDisplay);
+<div id="timer">60:00</div>
 
-        function updateTimer() {
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            timerDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            if (totalSeconds <= 0) {
-                clearInterval(timerInterval);
-                alert("Time is up! Submitting your answers...");
-                document.querySelector('form').submit();
-            }
-            totalSeconds--;
+<script>
+    let totalSeconds = 60 * 60;
+    const timerDisplay = document.getElementById('timer');
+
+    function updateTimer() {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        timerDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        if (totalSeconds <= 0) {
+            clearInterval(timerInterval);
+            alert("Time is up! Submitting your answers...");
+            document.querySelector('form').submit();
         }
+        totalSeconds--;
+    }
 
-        const timerInterval = setInterval(updateTimer, 1000);
-
-        // ✅ FIXED: Correct tab switch tracking URL
-        document.addEventListener("visibilitychange", function() {
-            if (document.hidden) {
-                fetch("/track-tab", {
-                    method: "POST"
-                });
-            }
-        });
-    </script>
+    const timerInterval = setInterval(updateTimer, 1000);
+</script>
 
 </body>
 </html>
