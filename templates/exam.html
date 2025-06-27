@@ -36,24 +36,13 @@
         .submit-btn:hover {
             background-color: #0056b3;
         }
-        .timer {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 10px;
-            font-weight: bold;
-            border-radius: 8px;
-        }
     </style>
 </head>
 <body>
 
     <h1>DISCIPLESHIP TRAINING '25 CBT EXAM</h1>
 
-    <div class="timer" id="timer">60:00</div>
-
+    <!-- ✅ FIX: Correct form action -->
     <form method="POST" action="{{ url_for('exam') }}">
         {% for q in questions %}
             <div class="question">
@@ -68,15 +57,25 @@
         <button type="submit" class="submit-btn">Submit Answers</button>
     </form>
 
-    <!-- Countdown Timer -->
+    <!-- ✅ Timer and corrected tab switch tracker -->
     <script>
         let totalSeconds = 60 * 60; // 60 minutes
-        const timer = document.getElementById('timer');
+        const timerDisplay = document.createElement('div');
+        timerDisplay.style.position = 'fixed';
+        timerDisplay.style.top = '10px';
+        timerDisplay.style.right = '10px';
+        timerDisplay.style.backgroundColor = '#f8d7da';
+        timerDisplay.style.color = '#721c24';
+        timerDisplay.style.padding = '10px';
+        timerDisplay.style.fontWeight = 'bold';
+        timerDisplay.style.borderRadius = '8px';
+        timerDisplay.innerText = "60:00";
+        document.body.appendChild(timerDisplay);
 
         function updateTimer() {
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
-            timer.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            timerDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
             if (totalSeconds <= 0) {
                 clearInterval(timerInterval);
                 alert("Time is up! Submitting your answers...");
@@ -86,6 +85,15 @@
         }
 
         const timerInterval = setInterval(updateTimer, 1000);
+
+        // ✅ FIXED: Correct tab switch tracking URL
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                fetch("/track-tab", {
+                    method: "POST"
+                });
+            }
+        });
     </script>
 
 </body>
