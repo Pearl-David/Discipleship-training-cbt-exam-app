@@ -22,8 +22,6 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     attempted = db.Column(db.Boolean, default=False)
     score = db.Column(db.Integer)
-    tab_switches = db.Column(db.Integer, default=0)
-    last_tab_switch = db.Column(db.DateTime)
 
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
