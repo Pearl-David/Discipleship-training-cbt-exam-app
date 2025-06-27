@@ -85,18 +85,6 @@
 
         const timerInterval = setInterval(updateTimer, 1000);
 
-        // Tab switch / split screen detection
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) {
-                fetch("/track-tab", { method: "POST" });
-                alert("Tab switch or app minimized detected! Be careful.");
-            }
-        });
-
-        window.addEventListener("blur", () => {
-            fetch("/track-tab", { method: "POST" });
-            alert("Focus lost (possible split screen or app switch)!");
-        });
     </script>
 
 </body>
