@@ -42,7 +42,7 @@
 
     <h1>DISCIPLESHIP TRAINING '25 CBT EXAM</h1>
 
-    <form method="post">
+    <form method="POST" action="{{ url_for('exam') }}">
         {% for q in questions %}
             <div class="question">
                 <p><strong>Q{{ loop.index }}:</strong> {{ q.text }}</p>
