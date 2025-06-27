@@ -2,86 +2,102 @@
 <html>
 <head>
     <title>CBT Exam</title>
-    <meta charset="UTF-8">
     <style>
         body {
             font-family: Arial, sans-serif;
             background: #f4f4f4;
             padding: 20px;
         }
-        .container {
-            background: white;
-            padding: 20px;
-            max-width: 800px;
-            margin: auto;
-            border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        h1 {
+            text-align: center;
+            color: #333;
         }
         .question {
-            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
         }
-        h2 {
-            text-align: center;
+        .question p {
+            margin: 0 0 10px;
         }
         .submit-btn {
-            display: block;
-            margin: 20px auto;
-            background: #007BFF;
+            background-color: #007bff;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 20px;
             font-size: 16px;
-            border-radius: 5px;
             cursor: pointer;
+            border-radius: 6px;
+            display: block;
+            margin: 20px auto;
         }
         .submit-btn:hover {
-            background: #0056b3;
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>CBT Exam</h2>
-        <form method="POST" action="/submit" id="examForm">
-            {% for q in questions %}
-                <div class="question">
-                    <p><strong>{{ loop.index }}. {{ q.text }}</strong></p>
-                    <label><input type="radio" name="q{{ q.id }}" value="A" required> A. {{ q.option_a }}</label><br>
-                    <label><input type="radio" name="q{{ q.id }}" value="B"> B. {{ q.option_b }}</label><br>
-                    <label><input type="radio" name="q{{ q.id }}" value="C"> C. {{ q.option_c }}</label>
-                </div>
-            {% endfor %}
-            <button type="submit" class="submit-btn">Submit</button>
-        </form>
-    </div>
 
-    <!-- 🔐 Anti-Malpractice Script -->
+    <h1>DISCIPLESHIP TRAINING '25 CBT EXAM</h1>
+
+    <form method="POST" action="{{ url_for('exam') }}">
+        {% for q in questions %}
+            <div class="question">
+                <p><strong>Q{{ loop.index }}:</strong> {{ q.text }}</p>
+                <label><input type="radio" name="{{ q.id }}" value="A"> A. {{ q.option_a }}</label><br>
+                <label><input type="radio" name="{{ q.id }}" value="B"> B. {{ q.option_b }}</label><br>
+                {% if q.option_c %}
+                <label><input type="radio" name="{{ q.id }}" value="C"> C. {{ q.option_c }}</label><br>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="submit-btn">Submit Answers</button>
+    </form>
+
+    <!-- Countdown Timer and Anti-Cheat JS -->
     <script>
-    let switchCount = 0;
-    let warningIssued = false;
+        let totalSeconds = 60 * 60; // 60 minutes
+        const timerDisplay = document.createElement('div');
+        timerDisplay.style.position = 'fixed';
+        timerDisplay.style.top = '10px';
+        timerDisplay.style.right = '10px';
+        timerDisplay.style.backgroundColor = '#f8d7da';
+        timerDisplay.style.color = '#721c24';
+        timerDisplay.style.padding = '10px';
+        timerDisplay.style.fontWeight = 'bold';
+        timerDisplay.style.borderRadius = '8px';
+        timerDisplay.innerText = "60:00";
+        document.body.appendChild(timerDisplay);
 
-    function logTabSwitch() {
-        fetch('/log_tab_switch', {method: 'POST'});
-    }
-
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-            switchCount++;
-            logTabSwitch();
-            if (!warningIssued) {
-                alert("⚠️ Tab switch detected! Please return. Exam will auto-submit on second switch.");
-                warningIssued = true;
-            } else {
-                alert("⛔ Second switch detected! Submitting exam now.");
-                document.getElementById("examForm").submit();
+        function updateTimer() {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            timerDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            if (totalSeconds <= 0) {
+                clearInterval(timerInterval);
+                alert("Time is up! Submitting your answers...");
+                document.querySelector('form').submit();
             }
+            totalSeconds--;
         }
-    });
 
-    document.addEventListener("contextmenu", event => event.preventDefault());
-    document.onkeydown = function(e) {
-        if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u')) return false;
-    };
+        const timerInterval = setInterval(updateTimer, 1000);
+
+        // Tab switch / split screen detection
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                fetch("/track-tab", { method: "POST" });
+                alert("Tab switch or app minimized detected! Be careful.");
+            }
+        });
+
+        window.addEventListener("blur", () => {
+            fetch("/track-tab", { method: "POST" });
+            alert("Focus lost (possible split screen or app switch)!");
+        });
     </script>
+
 </body>
 </html>
